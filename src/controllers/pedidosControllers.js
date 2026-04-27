@@ -1,8 +1,8 @@
 // Imports
-import pedidoRepositories from "../repositories/pedidoRepository";
-import { Pedido } from "../models/Pedido";
-import { ItensPedido } from "../models/Itens_Pedido";
-
+import pedidoRepositories from "../repositories/pedidoRepository.js";
+import { Pedido } from "../models/Pedido.js";
+import { ItensPedido } from "../models/Itens_Pedido.js";
+import { statusPedido } from "../enum/statusPedido.js";
 const pedidosController = {
   selecionar: async (req, res) => {
     try {
@@ -42,18 +42,28 @@ const pedidosController = {
     try {
       const { clienteId, itens } = req.body;
       const itensPedido = itens.map(item => {
+        console.log("Itens:", item);
         ItensPedido.criar({
           produtoId: item.produtoId,
           quantidade: item.quantidade,
           valorItem: item.valorItem,
         });
       });
-      const subTotalItens = ItensPedido.calcularTotal(itensPedido); //Cria metedo para calcular
-      const pedido = Pedido.criar({ clienteId, subTotalItens, Status });
+      console.log(itensPedido);
+      const subTotalItens = ItensPedido.calcularSubTotal(itensPedido); //Cria metedo para calcular
+      const pedido = Pedido.criar({
+        clienteId,
+        subTotalItens,
+        status: statusPedido.ABERTO,
+      });
+
+      const result = await pedidoRepositories.post(pedido, itensPedido);
+      return res.status(200).json({ result });
     } catch (error) {
       console.log(error);
       res.status(500).json({
         message: "Ocorreu um erro no servidor",
+        Error: error.message,
       });
     }
   },
@@ -85,4 +95,4 @@ const pedidosController = {
   },
 };
 
-export default clienteController;
+export default pedidosController;

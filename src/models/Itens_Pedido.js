@@ -62,7 +62,7 @@ export class ItensPedido {
   }
 
   #validarPedidoId(value) {
-    if (!value || value <= 0) {
+    if (value && value <= 0) {
       throw new Error("Verifique o ID do produto informado");
     }
   }
