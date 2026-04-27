@@ -56,25 +56,26 @@ const clienteController = {
       }
 
       // --- Clientes --- //
+      
       if (!nome || nome.length < 3) {
         return res.status(400).json({
           Message: "Verifique o nome",
         });
       }
-
-      // CORREÇÃO: Passando como objeto { nome, cpf: cpfLimpo }
-      const cliente = Clientes.criar({ nome, cpf: cpfLimpo });
+      
+      const cliente = Clientes.criar({ nome, cpfLimpo });
 
       // --- telefone --- //
+
       if (telefones.length != 10) {
         return res.status(400).json({
           Message: "Digite um Telefone válido!",
         });
       }
-      // CORREÇÃO: Passando como objeto (assumindo que a classe siga o mesmo padrão)
       const telefone = Telefone.criar({ telefones });
 
       //--- endereco --- //
+      
       if (cep.length != 8) {
         return res.status(400).json({
           Message:
@@ -91,7 +92,6 @@ const clienteController = {
       const localidade = response.localidade;
       const uf = response.uf;
 
-      // CORREÇÃO: Passando todos os parâmetros dentro de um único objeto
       const endereco = Enderecos.criar({
         cep,
         logradouro,

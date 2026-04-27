@@ -1,37 +1,29 @@
 import { connection } from "../config/Database.js";
 
-const clientesRepositories = {
-  post: async (cliente, telefone, endereco) => {
+const pedidoRepositories = {
+  post: async (pedido, itemPed) => {
     const conn = await connection.getConnection();
     try {
       await conn.beginTransaction();
 
-      const sqlCli = "INSERT INTO clientes (nome, cpf) VALUES (?,?);";
-      const valuesCli = [cliente.nome, cliente.cpf];
-      const [rowsCli] = await conn.execute(sqlCli, valuesCli);
-      console.log(valuesCli);
+      // --- insert Pedido --- //
 
-      const sqlTel = "INSERT INTO telefone (idCliente, numero) VALUES (?,?);";
-      const valuesTel = [rowsCli.insertId, telefone.numero];
-      const [rowsTel] = await conn.execute(sqlTel, valuesTel);
-      console.log(valuesTel);
+      const sqlPedido =
+        "INSERT INTO pedidos (ClienteID, Subtotal, Status) VALUES (?,?,?);";
+      const valuesPedido = [pedido.clienteId, pedido.subTotal, pedido.Status];
+      const [rowsPedido] = await conn.execute(sqlPedido, valuesPedido);
+      console.log(valuesPedido);
 
-      const sqlEnd =
-        "INSERT INTO enderecos (idCliente, cep, logradouro, numero, complemento, bairro, cidade, uf) VALUES (?,?,?,?,?,?,?,?);";
-      const valuesEnd = [
-        rowsCli.insertId,
-        endereco.cep,
-        endereco.logradouro,
-        endereco.numero,
-        endereco.complemento,
-        endereco.bairro,
-        endereco.localidade,
-        endereco.uf,
-      ];
-      console.log(valuesEnd);
-      const [rowsEnd] = await conn.execute(sqlEnd, valuesEnd);
+      // --- insert itens_pedido --- //
+      array.forEach(async element => {
+        const sqlItemPed =
+          "INSERT INTO itens_pedidos (PedidoId, ProdutoId, Quantidade, ValorItem) VALUES (?,?,?,?);";
+        const valuesItemPed = [rowsPedido.insertId,element.produtoId,element.quantidade,element.valorItem];
+        await conn.execute(sqlItemPed, valuesItemPed);
+      });
+
       await conn.commit();
-      return { rowsCli, rowsTel, rowsEnd };
+      return { rowsPedido };
     } catch (error) {
       await conn.rollback();
       throw new Error(error);
@@ -52,9 +44,9 @@ const clientesRepositories = {
       "SELECT c.id, t.numero, e.cidade, e.cep, e.logradouro ,e.numero, e.complemento, e.bairro, e.cidade \
     FROM clientes AS c \
     INNER JOIN telefones AS t \
-	ON c.Id = t.idCliente \
+    ON c.Id = t.idCliente \
 INNER JOiN enderecos AS e \
-	ON c.Id = e.idCliente";
+    ON c.Id = e.idCliente";
     const [rows] = await connection.execute(sql);
     return rows;
   },
@@ -64,9 +56,9 @@ INNER JOiN enderecos AS e \
       "SELECT c.id, t.numero, e.cidade, e.cep, e.logradouro ,e.numero, e.complemento, e.bairro, e.cidade \
     FROM clientes AS c \
     INNER JOIN telefones AS t \
-	ON c.Id = t.idCliente \
+    ON c.Id = t.idCliente \
 INNER JOiN enderecos AS e \
-	ON c.Id = e.idCliente\
+    ON c.Id = e.idCliente\
   WHERE c.id = ?";
     const value = [id];
     const [rows] = await connection.execute(sql, value);
@@ -81,4 +73,4 @@ INNER JOiN enderecos AS e \
   },
 };
 
-export default clientesRepositories;
+export default pedidoRepositories;
