@@ -166,6 +166,27 @@ const pedidosController = {
       });
     }
   },
+  deletarItemPedido: async (req, res) => {
+    try {
+     const idItem = Number(req.params.idItem);
+
+      if (!idItem) {
+        return res.status(400).json({ message: "ID do item é obrigatório." });
+      }
+
+      const resultado = await pedidoRepositories.deletarItem(idItem);
+
+      return res.status(200).json({
+        message: "Item removido e subtotal atualizado!",
+        novoSubtotal: resultado.novoTotal,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: "Erro ao remover item.",
+        error: error.message,
+      });
+    }
+  },
 };
 
 export default pedidosController;

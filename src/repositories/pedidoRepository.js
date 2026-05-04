@@ -171,6 +171,42 @@ const pedidoRepositories = {
     const [rows] = await connection.execute(sql, values);
     return rows;
   },
+  deletarItem: async id => {
+    const conn = await connection.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      const BuscarPedido = "SELECT PedidoId FROM itens_pedidos WHERE id = ?";
+      const [itensEncontrados] = await conn.execute(BuscarPedido, [id]);
+
+      if (itensEncontrados.length === 0) {
+        throw new Error("Item não encontrado.");
+      }
+
+      const idPedido = itensEncontrados[0].PedidoId;
+
+      const sqlDelete = "DELETE FROM itens_pedidos WHERE id = ?;";
+      await conn.execute(sqlDelete, [id]);
+
+      const sqlSoma =
+        "SELECT SUM(Quantidade * ValorItem) as novoTotal FROM itens_pedidos WHERE PedidoId = ?;";
+      const [rowsSoma] = await conn.execute(sqlSoma, [idPedido]); // Use idPedido aqui, não id do item!
+
+      const novoTotal = rowsSoma[0].novoTotal;
+
+      const sqlUpdate = "UPDATE pedidos SET subtotal = ? WHERE id = ?;";
+      await conn.execute(sqlUpdate, [novoTotal, idPedido]);
+
+      await conn.commit();
+      return { success: true, novoTotal };
+    } catch (error) {
+      await conn.rollback();
+      console.error("Erro ao deletar item e atualizar subtotal:", error);
+      throw error;
+    } finally {
+      conn.release();
+    }
+  },
 };
 
 export default pedidoRepositories;

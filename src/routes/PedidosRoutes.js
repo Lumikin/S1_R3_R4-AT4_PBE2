@@ -11,5 +11,6 @@ pedidosRoutes.put("/:idPedido",pedidosController.atualizarPedido)
 pedidosRoutes.get("/Item", pedidosController.selecionarItens);
 pedidosRoutes.put("/Item", pedidosController.atualizarPedido);
 pedidosRoutes.post("/Item/:idPedido", pedidosController.criarItem);
+pedidosRoutes.delete("/Item/:idItem", pedidosController.deletarItemPedido);
 
 export default pedidosRoutes;
