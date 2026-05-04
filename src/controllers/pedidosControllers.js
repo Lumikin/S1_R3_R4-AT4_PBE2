@@ -40,26 +40,34 @@ const pedidosController = {
 
   criar: async (req, res) => {
     try {
-      const { clienteId, itens } = req.body;
+      const { ClienteId, itens } = req.body;
+      console.log(req.body);
+      
       const itensPedido = itens.map(item => {
         console.log("Itens:", item);
-        ItensPedido.criar({
-          produtoId: item.produtoId,
+        return ItensPedido.criar({
+          produtoId: item.ProdutoId,
           quantidade: item.quantidade,
           valorItem: item.valorItem,
         });
       });
-      console.log(itensPedido);
-      const subTotalItens = ItensPedido.calcularSubTotal(itensPedido); //Cria metedo para calcular
+      console.log("aaaa",itensPedido);
+      const subTotalItens = ItensPedido.calcularSubTotal(itensPedido);
       const pedido = Pedido.criar({
-        clienteId,
+        ClienteId,
         subTotalItens,
         status: statusPedido.ABERTO,
       });
-
-      const result = await pedidoRepositories.post(pedido, itensPedido);
+      console.log(pedido, "agaragar")
+      const result = await pedidoRepositories.post(
+        pedido, 
+        itensPedido
+      );
+      
+      
       return res.status(200).json({ result });
-    } catch (error) {
+    } 
+    catch (error) {
       console.log(error);
       res.status(500).json({
         message: "Ocorreu um erro no servidor",

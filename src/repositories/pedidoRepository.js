@@ -6,32 +6,37 @@ const pedidoRepositories = {
     try {
       await conn.beginTransaction();
 
-      // --- insert Pedido --- //
-
       const sqlPedido =
         "INSERT INTO pedidos (ClienteID, Subtotal, Status) VALUES (?,?,?);";
-      const valuesPedido = [pedido.clienteId, pedido.subTotal, pedido.Status];
-      const [rowsPedido] = await conn.execute(sqlPedido, valuesPedido);
-      console.log(valuesPedido);
 
-      // --- insert itens_pedido --- //
-      array.forEach(async element => {
-        const sqlItemPed =
-          "INSERT INTO itens_pedidos (PedidoId, ProdutoId, Quantidade, ValorItem) VALUES (?,?,?,?);";
-        const valuesItemPed = [rowsPedido.insertId,element.produtoId,element.quantidade,element.valorItem];
+      // Chamando os Getters minúsculos definidos na classe acima
+      const valuesPedido = [pedido.ClienteId, pedido.subTotal, pedido.status];
+
+      const [rowsPedido] = await conn.execute(sqlPedido, valuesPedido);
+
+      const sqlItemPed =
+        "INSERT INTO itens_pedidos (PedidoId, ProdutoId, Quantidade, ValorItem) VALUES (?,?,?,?);";
+
+      // IMPORTANTE: Use for...of para operações assíncronas em banco
+      for (const item of itemPed) {
+        const valuesItemPed = [
+          rowsPedido.insertId, // ID do pedido que acabou de ser criado
+          item.produtoId,
+          item.quantidade,
+          item.valorItem,
+        ];
         await conn.execute(sqlItemPed, valuesItemPed);
-      });
+      }
 
       await conn.commit();
       return { rowsPedido };
     } catch (error) {
       await conn.rollback();
-      throw new Error(error);
+      throw error;
     } finally {
       conn.release();
     }
   },
-
   put: async categoria => {
     const sql = "UPDATE categorias SET Nome=?, Descricao=? WHERE id=?;";
     const values = [categoria.nome, categoria.descricao, categoria.id];

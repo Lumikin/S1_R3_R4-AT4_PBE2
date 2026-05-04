@@ -1,23 +1,24 @@
 export class Pedido {
   #id;
-  #clienteId;
+  #ClienteId;
   #subtotal;
   #status;
   #dataCad;
 
-  // Contructor //
+  // Constructor //
   constructor(pCliente, pSubTotal, pStatus, pID) {
-    this.#clienteId = pCliente;
+    this.#ClienteId = pCliente;
     this.#subtotal = pSubTotal;
     this.#status = pStatus;
     this.#id = pID;
   }
+
   // Getters //
   get id() {
     return this.#id;
   }
-  get clienteId() {
-    return this.#clienteId;
+  get ClienteId() {
+    return this.#ClienteId;
   }
   get subTotal() {
     return this.#subtotal;
@@ -29,34 +30,32 @@ export class Pedido {
     return this.#dataCad;
   }
 
-  // Setters //
   set id(value) {
-    this.validarId(value);
-    return (this.#id = value);
+    this.#validarId(value);
+    this.#id = value;
   }
-
-  set clienteId(value) {
-    this.validarClienteId(value);
-    return (this.#clienteId = value);
+  set ClienteId(value) {
+    this.#validarClienteId(value);
+    this.#ClienteId = value;
   }
   set subTotal(value) {
-    this.validarSubTotal(value);
-    return (this.#subtotal = value);
+    this.#validarSubTotal(value);
+    this.#subtotal = value;
   }
   set status(value) {
-    this.validarStatus(value);
-    return (this.#id = value);
+    this.#validarStatus(value);
+    this.#status = value;
   }
-  // Métodos auxiliares //
+
   #validarId(value) {
-    if (!value && value < 0) {
+    if (!value || value < 0) {
       throw new Error("Verifique o ID informado");
     }
   }
 
   #validarClienteId(value) {
-    if (!value && value < 0) {
-      throw new Error("Verifique o ID informado");
+    if (!value || value <= 0) {
+      throw new Error("Verifique o ID do cliente informado");
     }
   }
 
@@ -66,11 +65,20 @@ export class Pedido {
     }
   }
 
-  //Desing Pattern
-  static criar(dados) {
-    return new Pedido(dados.clienteId, dados.subtotal, dados.status, null);
+  #validarStatus(value) {
+    // Faltava esse método
+    if (!value) {
+      throw new Error("O status é obrigatório");
+    }
   }
+
+  // Design Pattern
+  static criar(dados) {
+    console.log("Dados do obj Pedido:", dados);
+    return new Pedido(dados.ClienteId, dados.subTotalItens, dados.status, null);
+  }
+
   static editar(dados, id) {
-    return new Pedido(dados.clienteId, dados.subtotal, dados.status, id);
+    return new Pedido(dados.ClienteId, dados.subtotal, dados.status, id);
   }
 }
