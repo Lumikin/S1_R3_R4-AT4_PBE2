@@ -6,13 +6,16 @@ import { statusPedido } from "../enum/statusPedido.js";
 const pedidosController = {
   selecionar: async (req, res) => {
     try {
-      const result = await pedidoRepositories.get();
+      const result = await pedidoRepositories.getPedido();
       if (result.length === 0) {
         return res.status(200).json({
           Message: "Essa tabela não contem registros",
         });
       }
-      res.status(201).json({ result });
+      res.status(201).json({
+        Message: "Pedidos encontrados!",
+        Data: result,
+      });
     } catch (error) {
       console.log(error);
       res.status(500).json({
@@ -20,10 +23,30 @@ const pedidosController = {
       });
     }
   },
+  selecionarItens: async (req, res) => {
+    try {
+      const result = await pedidoRepositories.getItem();
+      if (result.length === 0) {
+        return res.status(200).json({
+          Message: "Essa tabela não contem registros",
+        });
+      }
+      res.status(201).json({
+        Message: "Itens encontrados!",
+        Data: result,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        message: "Ocorreu um erro no servidor",
+      });
+    }
+  },
+
   selecionarId: async (req, res) => {
     try {
       const id = Number(req.params.id);
-      const result = await clientesRepositories.getId(id);
+      const result = await pedidoRepositories.getPedidoId(id);
       if (result.length === 0) {
         return res.status(200).json({
           Message: "Esse ID não contem registro!",
@@ -55,8 +78,8 @@ const pedidosController = {
       const subTotalItens = ItensPedido.calcularSubTotal(itensPedido);
       const pedido = Pedido.criar({
         ClienteId,
-        subTotalItens,
         status: statusPedido.ABERTO,
+        subTotalItens,
       });
       const result = await pedidoRepositories.criar(pedido, itensPedido);
       console.log(result);
@@ -71,7 +94,7 @@ const pedidosController = {
   },
   criarItem: async (req, res) => {
     try {
-      const { itens } = req.body;
+      const { itens, ClienteId } = req.body;
       const idPedido = Number(req.params.idPedido);
 
       if (!idPedido) {
@@ -105,19 +128,27 @@ const pedidosController = {
   },
   atualizarPedido: async (req, res) => {
     try {
-      const idPedido = Number(req.query.id); // Pegando o ID da URL (?id=123)
-      const { itensPedido } = req.body;
+      const idPedido = Number(req.query.id);
+      const { status } = req.body;
 
-      // 1. Instancia/Estrutura os dados (seguindo seu padrão Produtos.editar)
-      // Aqui você passa o array de itens e o ID do pedido pai
-      const pedidoEditado = Pedido.editar(idPedido, itensPedido);
+      if (!idPedido || isNaN(idPedido)) {
+        return res
+          .status(400)
+          .json({ message: "ID não capturado corretamente na URL" });
+      }
+      const pedidoEditado = Pedido.editar(status, idPedido);
 
-      // 2. Chama o Repository para fazer o trabalho pesado no banco
-      const result = await pedidoRepositories.alterarItem(pedidoEditado);
+      const result = await pedidoRepositories.alterarPedido(pedidoEditado);
 
-      res.status(200).json({ result });
+      if (result.affectedRows === 0) {
+        throw new Error("Pedido não encontrado para atualização.");
+      }
+      return res.status(200).json({
+        message: "Pedido atualizado com sucesso!",
+        result,
+      });
     } catch (error) {
-      console.log(error);
+      console.error(error); // console.error é melhor para erros
       res.status(500).json({
         message: "Ocorreu um erro no servidor ao alterar o pedido",
       });

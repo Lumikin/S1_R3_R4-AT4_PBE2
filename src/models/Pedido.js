@@ -6,11 +6,11 @@ export class Pedido {
   #dataCad;
 
   // Constructor //
-  constructor(pCliente, pSubTotal, pStatus, pID) {
-    this.#ClienteId = pCliente;
-    this.#subtotal = pSubTotal;
-    this.#status = pStatus;
-    this.#id = pID;
+  constructor(pCliente, pSubTotal, pStatus, id) {
+    this.clienteId = pCliente;
+    this.id = id; // Aqui ele chama o 'set id(valor)'
+    this.status = pStatus;
+    this.subtotal = pSubTotal;
   }
 
   // Getters //
@@ -31,7 +31,7 @@ export class Pedido {
   }
 
   set id(value) {
-    this.#validarId(value);
+    // this.#validarId(value);
     this.#id = value;
   }
   set ClienteId(value) {
@@ -47,11 +47,11 @@ export class Pedido {
     this.#status = value;
   }
 
-  #validarId(value) {
-    if (!value || value < 0) {
-      throw new Error("Verifique o ID informado");
-    }
-  }
+  // #validarId(value) {
+  //   if (!value || value < 0) {
+  //     throw new Error("Verifique o ID informado");
+  //   }
+  // }
 
   #validarClienteId(value) {
     if (!value || value <= 0) {
@@ -75,10 +75,10 @@ export class Pedido {
   // Design Pattern
   static criar(dados) {
     console.log("Dados do obj Pedido:", dados);
-    return new Pedido(dados.ClienteId, dados.subTotalItens, dados.status, null);
+    return new Pedido(dados.ClienteId, dados.status, dados.subTotalItens, null);
   }
 
-  static editar(dados, id) {
-    return new Pedido(dados.ClienteId, dados.subtotal, dados.status, id);
+  static editar(pStatus, id) {
+    return new Pedido(null, null, pStatus, id);
   }
 }

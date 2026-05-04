@@ -1,6 +1,13 @@
 import { connection } from "../config/Database.js";
 
 const pedidoRepositories = {
+  // --- Pedidos --- //
+  getPedidoId: async id => {
+    const sql = "SELECT * FROM pedidos where id = ?;";
+    const value = [id];
+    const [rows] = await connection.execute(sql, value);
+    return rows;
+  },
   criar: async (pedido, itemPed) => {
     const conn = await connection.getConnection();
     try {
@@ -37,6 +44,35 @@ const pedidoRepositories = {
       conn.release();
     }
   },
+  alterarPedido: async pedido => {
+    const conn = await connection.getConnection();
+    console.log("Dados que chegaram no Repo:", pedido);
+    try {
+      await conn.beginTransaction();
+
+      const sql = "UPDATE pedidos SET status = ? WHERE Id = ?;";
+      const values = [pedido.status, pedido.id];
+      const [rows] = await connection.execute(sql, values);
+
+      return rows;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+  getPedido: async () => {
+    const sql = "SELECT * FROM pedidos";
+    const [rows] = await connection.execute(sql);
+    return rows;
+  },
+
+  // --- itens_pedidos --- //
+
+  getItem: async () => {
+    const sql = "SELECT * FROM itens_pedidos";
+    const [rows] = await connection.execute(sql);
+    return rows;
+  },
   criarItem: async (idPedido, itensPedido) => {
     const conn = await connection.getConnection();
     try {
@@ -64,7 +100,7 @@ const pedidoRepositories = {
       const novoSubTotal = rowsSoma[0].novoSubTotal;
 
       // --- 3. ATUALIZAR O PEDIDO: novoSubTotal => SubTotal --- //
-      
+
       const sqlUpdatePedido = "UPDATE pedidos SET Subtotal = ? WHERE id = ?;";
       const valuesUpdate = [novoSubTotal, idPedido];
       await conn.execute(sqlUpdatePedido, valuesUpdate);
@@ -84,7 +120,6 @@ const pedidoRepositories = {
       conn.release();
     }
   },
-
   alterarItem: async (idPedido, itensPedido) => {
     const conn = await connection.getConnection();
     try {
@@ -106,7 +141,8 @@ const pedidoRepositories = {
       // 2. Busca a soma atualizada
       const sqlSoma =
         "SELECT SUM(Quantidade * ValorItem) as novoSubTotal FROM itens_pedidos WHERE PedidoId = ?;";
-      const [rowsSoma] = await conn.execute(sqlSoma, [dadosPedido.idPedido]);
+      const values = [dadosPedido.idPedido];
+      const [rowsSoma] = await conn.execute(sqlSoma, values);
       const novoSubTotal = rowsSoma[0].novoSubTotal;
 
       // 3. Atualiza o subtotal no pedido principal
@@ -122,14 +158,8 @@ const pedidoRepositories = {
       conn.release();
     }
   },
-  get: async () => {
-    const sql = "SELECT * FROM pedidos";
-    const [rows] = await connection.execute(sql);
-    return rows;
-  },
-
-  getId: async id => {
-    const sql = "";
+  getItemId: async id => {
+    const sql = "SELECT * FROM itens_pedidos where id = ?;";
     const value = [id];
     const [rows] = await connection.execute(sql, value);
     return rows;

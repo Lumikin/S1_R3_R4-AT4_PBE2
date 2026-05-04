@@ -71,14 +71,13 @@ INNER JOiN enderecos AS e \
   },
 
   getId: async id => {
-    const sql =
-      "SELECT c.id, t.numero, e.cidade, e.cep, e.logradouro ,e.numero, e.complemento, e.bairro, e.cidade \
-    FROM clientes AS c \
-    INNER JOIN telefones AS t \
-	ON c.Id = t.idCliente \
-INNER JOiN enderecos AS e \
-	ON c.Id = e.idCliente\
-  WHERE c.id = ?";
+    const sql = `
+  SELECT c.id, t.numero, e.cidade, e.cep, e.logradouro, e.numeroCasa, e.complemento, e.bairro
+  FROM clientes AS c
+  INNER JOIN telefones AS t ON c.id = t.idCliente
+  INNER JOIN enderecos AS e ON c.id = e.idCliente
+  WHERE c.id = ?;
+`;
     const value = [id];
     const [rows] = await connection.execute(sql, value);
     return rows;
