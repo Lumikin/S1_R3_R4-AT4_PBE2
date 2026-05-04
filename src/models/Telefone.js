@@ -60,11 +60,11 @@ export class Telefone {
   // Design pattern: Factory
 
   static criar(dados) {
-    console.log('Criar Telefone:',dados)
-    return new Telefone(dados.numero, null, null);
+    console.log("Criar Telefone:", dados);
+    return new Telefone(dados.numero, dados.idCliente, null);
   }
 
   static editar(dados, id) {
-    return new Produtos(dados.idCliente, dados.numero, id);
+    return new Produtos(dados.telefones, dados.idCliente, id);
   }
 }

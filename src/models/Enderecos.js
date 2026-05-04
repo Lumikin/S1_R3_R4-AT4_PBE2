@@ -5,7 +5,7 @@ export class Enderecos {
   #logradouro;
   #bairro;
   #complemento;
-  #numero;
+  #numeroCasa;
   #uf;
   #localidade;
   //#dataCad
@@ -13,7 +13,7 @@ export class Enderecos {
   constructor(
     cep,
     logradouro,
-    numero,
+    numeroCasa,
     complemento,
     bairro,
     localidade,
@@ -23,7 +23,7 @@ export class Enderecos {
   ) {
     this.#cep = cep;
     this.#logradouro = logradouro;
-    this.#numero = numero;
+    this.#numeroCasa = numeroCasa;
     this.#complemento = complemento;
     this.#bairro = bairro;
     this.#localidade = localidade;
@@ -93,6 +93,12 @@ export class Enderecos {
   set uf(value) {
     this.#uf = value;
   }
+  get numeroCasa() {
+    return this.#numeroCasa;
+  }
+  set numeroCasa(value) {
+    this.#numeroCasa = value;
+  }
   // --- Validação --- //
 
   #validarCep(value) {
@@ -108,11 +114,10 @@ export class Enderecos {
   }
 
   static criar(dados) {
-    console.log('Criar Enderecos:',dados);
     return new Enderecos(
       dados.cep,
       dados.logradouro,
-      dados.numero,
+      dados.numeroCasa,
       dados.complemento,
       dados.bairro,
       dados.localidade,

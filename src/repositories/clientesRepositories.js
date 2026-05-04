@@ -2,44 +2,56 @@ import { connection } from "../config/Database.js";
 
 const clientesRepositories = {
   post: async (cliente, telefone, endereco) => {
-    
     const conn = await connection.getConnection();
     try {
       await conn.beginTransaction();
 
+      // --- 1. CLIENTES ---
       const sqlCli = "INSERT INTO clientes (nome, cpf) VALUES (?,?);";
       const valuesCli = [cliente.nome, cliente.cpf];
+      console.log("DEBUG Valores Cliente:", valuesCli);
       const [rowsCli] = await conn.execute(sqlCli, valuesCli);
 
-      const sqlTel = "INSERT INTO telefone (idCliente, numero) VALUES (?,?);";
-      const valuesTel = [rowsCli.insertId, telefone.numero];
+      const idCliente = rowsCli.insertId;
+      if (!idCliente) {
+        console.log(
+          "ALERTA: insertId não foi retornado! Sua tabela clientes tem AUTO_INCREMENT?",
+        );
+      }
+
+      // --- 2. TELEFONE ---
+      const sqlTel = "INSERT INTO telefones (idCliente, numero) VALUES (?,?);";
+      const valuesTel = [idCliente, telefone.numero];
+      console.log("DEBUG Valores Telefone:", valuesTel);
       const [rowsTel] = await conn.execute(sqlTel, valuesTel);
 
+      // --- 3. ENDEREÇOS ---
       const sqlEnd =
-        "INSERT INTO enderecos (idCliente, cep, logradouro, numero, complemento, bairro, cidade, uf) VALUES (?,?,?,?,?,?,?,?);";
+        "INSERT INTO enderecos (idCliente, cep, logradouro, numeroCasa, complemento, bairro, cidade, uf) VALUES (?,?,?,?,?,?,?,?);";
       const valuesEnd = [
-        rowsCli.insertId,
+        idCliente,
         endereco.cep,
         endereco.logradouro,
-        endereco.numero,
+        endereco.numeroCasa,
         endereco.complemento,
         endereco.bairro,
         endereco.localidade,
         endereco.uf,
       ];
-      console.log(valuesEnd)
+      console.log("DEBUG Valores Endereço:", valuesEnd);
       const [rowsEnd] = await conn.execute(sqlEnd, valuesEnd);
-      conn.commit();
+
+      await conn.commit();
       return { rowsCli, rowsTel, rowsEnd };
     } catch (error) {
       await conn.rollback();
       throw new Error(error);
     } finally {
-      await conn.release();
+      conn.release();
     }
   },
 
-  put: async (categoria) => {
+  put: async categoria => {
     const sql = "UPDATE categorias SET Nome=?, Descricao=? WHERE id=?;";
     const values = [categoria.nome, categoria.descricao, categoria.id];
     const [rows] = await connection.execute(sql, values);
@@ -58,8 +70,8 @@ INNER JOiN enderecos AS e \
     return rows;
   },
 
-  getId: async (id) => {
-        const sql =
+  getId: async id => {
+    const sql =
       "SELECT c.id, t.numero, e.cidade, e.cep, e.logradouro ,e.numero, e.complemento, e.bairro, e.cidade \
     FROM clientes AS c \
     INNER JOIN telefones AS t \
@@ -72,7 +84,7 @@ INNER JOiN enderecos AS e \
     return rows;
   },
 
-  delete: async (id) => {
+  delete: async id => {
     const sql = "DELETE FROM categorias WHERE id=?;";
     const values = [id];
     const [rows] = await connection.execute(sql, values);

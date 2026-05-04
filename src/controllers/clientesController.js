@@ -44,37 +44,38 @@ const clienteController = {
 
   criar: async (req, res) => {
     try {
-      const { nome, cpf, cep, numero, telefones } = req.body;
+      const { nome, CPF, cep, numeroCasa, numero } = req.body;
 
       // --- CPF -- //
-      const cpfLimpo = limparNumero(cpf);
+      const cpf = limparNumero(CPF);
       // Valida diretamente o CPF limpo
-      if (!validarCPF(cpfLimpo)) {
+      if (!CPF || !validarCPF(cpf)) {
         return res.status(400).json({
           Message: "Digite um CPF valido!",
         });
       }
 
       // --- Clientes --- //
+
       if (!nome || nome.length < 3) {
         return res.status(400).json({
           Message: "Verifique o nome",
         });
       }
 
-      // CORREÇÃO: Passando como objeto { nome, cpf: cpfLimpo }
-      const cliente = Clientes.criar({ nome, cpf: cpfLimpo });
+      const cliente = Clientes.criar({ nome, cpf });
 
       // --- telefone --- //
-      if (telefones.length != 10) {
+
+      if (numero.length != 10) {
         return res.status(400).json({
           Message: "Digite um Telefone válido!",
         });
       }
-      // CORREÇÃO: Passando como objeto (assumindo que a classe siga o mesmo padrão)
-      const telefone = Telefone.criar({ telefones });
+      const telefone = Telefone.criar({ numero });
 
       //--- endereco --- //
+
       if (cep.length != 8) {
         return res.status(400).json({
           Message:
@@ -91,11 +92,10 @@ const clienteController = {
       const localidade = response.localidade;
       const uf = response.uf;
 
-      // CORREÇÃO: Passando todos os parâmetros dentro de um único objeto
       const endereco = Enderecos.criar({
         cep,
         logradouro,
-        numero,
+        numeroCasa,
         complemento,
         bairro,
         localidade,
