@@ -6,30 +6,41 @@ const clientesRepositories = {
     try {
       await conn.beginTransaction();
 
+      // --- 1. CLIENTES ---
       const sqlCli = "INSERT INTO clientes (nome, cpf) VALUES (?,?);";
       const valuesCli = [cliente.nome, cliente.cpf];
+      console.log("DEBUG Valores Cliente:", valuesCli);
       const [rowsCli] = await conn.execute(sqlCli, valuesCli);
-      console.log(valuesCli);
 
-      const sqlTel = "INSERT INTO telefone (idCliente, numero) VALUES (?,?);";
-      const valuesTel = [rowsCli.insertId, telefone.numero];
+      const idCliente = rowsCli.insertId;
+      if (!idCliente) {
+        console.log(
+          "ALERTA: insertId não foi retornado! Sua tabela clientes tem AUTO_INCREMENT?",
+        );
+      }
+
+      // --- 2. TELEFONE ---
+      const sqlTel = "INSERT INTO telefones (idCliente, numero) VALUES (?,?);";
+      const valuesTel = [idCliente, telefone.numero];
+      console.log("DEBUG Valores Telefone:", valuesTel);
       const [rowsTel] = await conn.execute(sqlTel, valuesTel);
-      console.log(valuesTel);
 
+      // --- 3. ENDEREÇOS ---
       const sqlEnd =
-        "INSERT INTO enderecos (idCliente, cep, logradouro, numero, complemento, bairro, cidade, uf) VALUES (?,?,?,?,?,?,?,?);";
+        "INSERT INTO enderecos (idCliente, cep, logradouro, numeroCasa, complemento, bairro, cidade, uf) VALUES (?,?,?,?,?,?,?,?);";
       const valuesEnd = [
-        rowsCli.insertId,
+        idCliente,
         endereco.cep,
         endereco.logradouro,
-        endereco.numero,
+        endereco.numeroCasa,
         endereco.complemento,
         endereco.bairro,
         endereco.localidade,
         endereco.uf,
       ];
-      console.log(valuesEnd);
+      console.log("DEBUG Valores Endereço:", valuesEnd);
       const [rowsEnd] = await conn.execute(sqlEnd, valuesEnd);
+
       await conn.commit();
       return { rowsCli, rowsTel, rowsEnd };
     } catch (error) {
